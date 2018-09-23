@@ -1,7 +1,3 @@
-# nuttx_api_examples
-
-nuttx api examples.   
-
 # How to use   
 
 git clone https://github.com/nopnop2002/nuttx_api_examples   
