@@ -2,14 +2,13 @@
 
 nuttx api examples.   
 
-#How to use   
+# How to use   
 
 git clone https://github.com/nopnop2002/nuttx_api_examples   
 cd nuttx_api_examples   
 
-nuttx directory structure.   
-$HOME---NuttX-+-nuttx   
-              +-apps---examples   
+Location of nuttx examples directory.   
+$HOME/NuttX/apps/examples   
 
 Copy all file to your NuttX/apps/examples directory.   
 
