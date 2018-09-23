@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EXAMPLES_TASK_TEST3
+	tristate "Task Scheduling Interfaces example"
+	default n
+	---help---
+		Enable the Task Create API example
+
+if EXAMPLES_TASK_TEST3
+
+config EXAMPLES_TASK_TEST3_PROGNAME
+	string "Program name"
+	default "task_test3"
+	depends on BUILD_LOADABLE
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config EXAMPLES_TASK_TEST3_PRIORITY
+	int "task priority"
+	default 100
+
+config EXAMPLES_TASK_TEST3_STACKSIZE
+	int "stack size"
+	default 2048
+
+endif

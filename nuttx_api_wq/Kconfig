@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EXAMPLES_WQ_TEST
+	tristate "Work Queue Interfaces example"
+	default n
+	---help---
+		Enable the Task Create API example
+
+if EXAMPLES_WQ_TEST
+
+config EXAMPLES_WQ_TEST_PROGNAME
+	string "Program name"
+	default "wq_test"
+	depends on BUILD_LOADABLE
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config EXAMPLES_WQ_TEST_PRIORITY
+	int "task priority"
+	default 100
+
+config EXAMPLES_WQ_TEST_STACKSIZE
+	int "stack size"
+	default 2048
+
+endif
