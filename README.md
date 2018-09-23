@@ -28,4 +28,4 @@ Appication Configureration > Examples
  File IO example   
 
 
-If you find any bug, please tell me via issue.   
+If you find any bug, please tell me via issues.   

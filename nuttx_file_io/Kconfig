@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EXAMPLES_FILE_TEST
+	tristate "File IO example"
+	default n
+	---help---
+		Enable the Task Create API example
+
+if EXAMPLES_FILE_TEST
+
+config EXAMPLES_FILE_TEST_PROGNAME
+	string "Program name"
+	default "file_test"
+	depends on BUILD_LOADABLE
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config EXAMPLES_FILE_TEST_PRIORITY
+	int "task priority"
+	default 100
+
+config EXAMPLES_FILE_TEST_STACKSIZE
+	int "stack size"
+	default 2048
+
+endif
