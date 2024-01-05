@@ -8,6 +8,7 @@ Copy all file to your $HOME/nuttxspaces/apps/examples directory and add all exam
 $ git clone https://github.com/nopnop2002/nuttx_api_examples   
 $ cd nuttx_api_examples   
 $ cp -r nuttx_api_* $HOME/nuttxspace/apps/examples/
+$ cp $HOME/nuttxspace/apps/examples/Kconfig $HOME/nuttxspace/apps/examples/Kconfig.old
 $ sed s@HOME@$HOME/nuttxspace/apps/example@g Kconfig >> $HOME/nuttxspace/apps/examples/Kconfig
 $ cd $HOME/nuttxspace/nuttx
 $ make menuconfig    
