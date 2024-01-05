@@ -22,4 +22,4 @@ make
 st-flash --connect-under-reset write nuttx.bin 0x8000000
 ```
 
-If you find any bug, please tell me via issues.   
+If you find any bugs, please let us know using issues.
