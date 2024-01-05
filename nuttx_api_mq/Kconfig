@@ -7,14 +7,13 @@ config EXAMPLES_MQ_TEST
 	tristate "Named Message Queue Interfaces example"
 	default n
 	---help---
-		Enable the Task Create API example
+		Enable the Named Message Queue Interfaces example.
 
 if EXAMPLES_MQ_TEST
 
 config EXAMPLES_MQ_TEST_PROGNAME
 	string "Program name"
 	default "mq_test"
-	depends on BUILD_LOADABLE
 	---help---
 		This is the name of the program that will be use when the NSH ELF
 		program is installed.

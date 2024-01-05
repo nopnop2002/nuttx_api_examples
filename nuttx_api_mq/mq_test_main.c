@@ -42,7 +42,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
+#include <mqueue.h>
 #include <sched.h>
 #include <errno.h>
 
@@ -110,7 +110,7 @@ static void get_primes(int *count, int *last)
 // Task Body
 static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
-  printf("%s start PID:%d system_timer:%d\n",argv[0],myPid,g_system_timer);
+  printf("%s start PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
 #if 0
   printf("argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
@@ -131,7 +131,7 @@ static void task_entry(int argc, char * argv[]) {
   }
 
   char msg_buffer[CONFIG_MQ_MAXMSGSIZE];
-  int prio;
+  unsigned int prio;
   int nbytes;
   while(1) {
     printf("%s Wait on Message Queue[%s]\n",argv[0],argv[1]);
@@ -141,7 +141,7 @@ static void task_entry(int argc, char * argv[]) {
     printf("%s msg_buufer=%s\n",argv[0],msg_buffer);
   }
   mq_close(my_mqfd);
-  printf("%s end PID:%d system_timer:%d\n",argv[0],myPid,g_system_timer);
+  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
 }
 
 // Task Launcher
@@ -171,7 +171,7 @@ int mq_test_main(int argc, char *argv[])
   struct mq_attr attr;
   mqd_t mqfd;
   char msg_buffer[CONFIG_MQ_MAXMSGSIZE];
-  int prio;
+  unsigned int prio;
   int status;
 
   if (strcmp(argv[1],"send") == 0) {
@@ -186,7 +186,7 @@ int mq_test_main(int argc, char *argv[])
       printf("ERROR mq_open failed\n");
     } 
     memset(msg_buffer,0,sizeof(msg_buffer));
-    sprintf(msg_buffer,"g_system_timer=%d",g_system_timer);
+    sprintf(msg_buffer,"g_system_ticks=%ld",g_system_ticks);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, prio);
     if (status < 0) {
       printf("ERROR mq_send failure=%d\n", status);
@@ -218,7 +218,7 @@ int mq_test_main(int argc, char *argv[])
       printf("ERROR mq_open failed\n");
     }
     memset(msg_buffer,0,sizeof(msg_buffer));
-    sprintf(msg_buffer,"g_system_timer=%d",g_system_timer);
+    sprintf(msg_buffer,"g_system_ticks=%ld",g_system_ticks);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, 47);
     if (status < 0) {
       printf("ERROR mq_send failure=%d\n", status);
@@ -230,7 +230,7 @@ int mq_test_main(int argc, char *argv[])
       printf("ERROR mq_open failed\n");
     }
     memset(msg_buffer,0,sizeof(msg_buffer));
-    sprintf(msg_buffer,"g_system_timer=%d",g_system_timer);
+    sprintf(msg_buffer,"g_system_ticks=%ld",g_system_ticks);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, 47);
     if (status < 0) {
       printf("ERROR mq_send failure=%d\n", status);

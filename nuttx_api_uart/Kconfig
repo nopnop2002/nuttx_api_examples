@@ -7,14 +7,13 @@ config EXAMPLES_UART_TEST
 	tristate "UART Interfaces example"
 	default n
 	---help---
-		Enable the Syslog API example
+		Enable the UART Interfaces example.
 
 if EXAMPLES_UART_TEST
 
 config EXAMPLES_UART_TEST_PROGNAME
 	string "Program name"
 	default "uart_test"
-	depends on BUILD_LOADABLE
 	---help---
 		This is the name of the program that will be use when the NSH ELF
 		program is installed.

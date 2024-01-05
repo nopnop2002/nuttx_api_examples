@@ -4,17 +4,16 @@
 #
 
 config EXAMPLES_TASK_TEST2
-	tristate "Task Control Interfaces example Part2"
+	tristate "Task Control Interfaces example 2"
 	default n
 	---help---
-		Enable the Task Create API example
+		Enable the Task Control Interfaces example.
 
 if EXAMPLES_TASK_TEST2
 
 config EXAMPLES_TASK_TEST2_PROGNAME
 	string "Program name"
 	default "task_test2"
-	depends on BUILD_LOADABLE
 	---help---
 		This is the name of the program that will be use when the NSH ELF
 		program is installed.

@@ -7,14 +7,13 @@ config EXAMPLES_TASK_TEST4
 	tristate "Task Synchronization Interfaces example"
 	default n
 	---help---
-		Enable the Task Create API example
+		Enable the Task Synchronization Interfaces example.
 
 if EXAMPLES_TASK_TEST4
 
 config EXAMPLES_TASK_TEST4_PROGNAME
 	string "Program name"
 	default "task_test4"
-	depends on BUILD_LOADABLE
 	---help---
 		This is the name of the program that will be use when the NSH ELF
 		program is installed.

@@ -115,7 +115,7 @@ static void get_primes(int *count, int *last)
 // Task Body
 static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
-  printf("%s start PID:%d system_timer:%d\n",argv[0],myPid,g_system_timer);
+  printf("%s start PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
 #if 0
   printf("argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
@@ -144,7 +144,7 @@ static void task_entry(int argc, char * argv[]) {
     printf("%s Lock success semaphore [%s]\n",argv[0],argv[1]);
   }
   sem_close(sem);
-  printf("%s end PID:%d system_timer:%d\n",argv[0],myPid,g_system_timer);
+  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
 }
 
 // Task Launcher

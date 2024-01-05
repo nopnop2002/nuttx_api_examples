@@ -106,7 +106,7 @@ static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[1]);
   int wait=atoi(argv[2]);
-  printf("%s start PID:%d loop:%d wait:%d system_timer:%d\n",argv[0],myPid,loop,wait,g_system_timer);
+  printf("%s start PID:%d loop:%d wait:%d system_ticks:%ld\n",argv[0],myPid,loop,wait,g_system_ticks);
 #if 0
   printf("argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
@@ -115,16 +115,14 @@ static void task_entry(int argc, char * argv[]) {
 #endif
   int count;
   int last;
-//  printf("%s loop=%d wait=%d\n",argv[0],loop,wait);
   for(int i=0;i<loop;i++) {
     if(wait) {
-//      printf("%s i=%d g_system_timer=%d\n",argv[0],i,g_system_timer);
       sleep(wait);
     } else {
       get_primes(&count, &last);
     }
   }
-  printf("%s end PID:%d system_timer:%d\n",argv[0],myPid,g_system_timer);
+  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
 }
 
 #if 0

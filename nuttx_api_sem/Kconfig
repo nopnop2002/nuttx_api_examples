@@ -7,14 +7,13 @@ config EXAMPLES_SEM_TEST
 	tristate "Counting Semaphore Interfaces example"
 	default n
 	---help---
-		Enable the Task Create API example
+		Enable the Counting Semaphore Interfaces example.
 
 if EXAMPLES_SEM_TEST
 
 config EXAMPLES_SEM_TEST_PROGNAME
 	string "Program name"
 	default "sem_test"
-	depends on BUILD_LOADABLE
 	---help---
 		This is the name of the program that will be use when the NSH ELF
 		program is installed.

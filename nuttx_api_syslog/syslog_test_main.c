@@ -71,7 +71,7 @@ static void send_task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[2]);
   int wait=atoi(argv[3]);
-  printf("%s start PID:%d device=%s loop:%d wait:%d system_timer:%d\n",argv[0],myPid,argv[1],loop,wait,g_system_timer);
+  printf("%s start PID:%d device=%s loop:%d wait:%d system_ticks:%ld\n",argv[0],myPid,argv[1],loop,wait,g_system_ticks);
   int fd = open(argv[1],O_RDWR);
   if (fd < 0) {
     printf("%s open error %d\n",argv[0],fd);
@@ -80,16 +80,14 @@ static void send_task_entry(int argc, char * argv[]) {
   char buffer[30];
   char CR = 0x0d;
   char LF = 0x0a;
-//  printf("%s loop=%d wait=%d\n",argv[0],loop,wait);
   for(int i=0;i<loop;i++) {
     memset(buffer,0,sizeof(buffer));
     sprintf(buffer,"this is %s %c%c",argv[1],CR,LF);
     write(fd,buffer,sizeof(buffer));
     if(wait) sleep(wait);
-//      printf("%s i=%d g_system_timer=%d\n",argv[0],i,g_system_timer);
   }
   close(fd);
-  printf("%s end PID:%d system_timer:%d\n",argv[0],myPid,g_system_timer);
+  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
 }
 
 // Task Launcher

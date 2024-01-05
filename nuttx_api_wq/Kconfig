@@ -7,14 +7,13 @@ config EXAMPLES_WQ_TEST
 	tristate "Work Queue Interfaces example"
 	default n
 	---help---
-		Enable the Task Create API example
+		Enable the Work Queue Interfaces example.
 
 if EXAMPLES_WQ_TEST
 
 config EXAMPLES_WQ_TEST_PROGNAME
 	string "Program name"
 	default "wq_test"
-	depends on BUILD_LOADABLE
 	---help---
 		This is the name of the program that will be use when the NSH ELF
 		program is installed.
