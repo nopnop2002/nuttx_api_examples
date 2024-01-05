@@ -1,7 +1,7 @@
 # How to use   
 
-Your nuttx directory is $HOME/nuttxspaces.   
-Copy all file to your $HOME/nuttxspaces/apps/nuttx_api_example directory and add all examples.   
+nuttx directory is $HOME/nuttxspaces.   
+Copy all file to your $HOME/nuttxspaces/apps/examples directory and add all examples to Kconfig.   
 
 
 ```
