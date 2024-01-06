@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/version.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -110,7 +111,7 @@ static void get_primes(int *count, int *last)
 // Task Body
 static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
-  printf("%s start PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
+  printf("%s start PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 #if 0
   printf("argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
@@ -141,7 +142,7 @@ static void task_entry(int argc, char * argv[]) {
     printf("%s msg_buufer=%s\n",argv[0],msg_buffer);
   }
   mq_close(my_mqfd);
-  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
+  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 }
 
 // Task Launcher
@@ -186,7 +187,7 @@ int mq_test_main(int argc, char *argv[])
       printf("ERROR mq_open failed\n");
     } 
     memset(msg_buffer,0,sizeof(msg_buffer));
-    sprintf(msg_buffer,"g_system_ticks=%ld",g_system_ticks);
+    sprintf(msg_buffer,"g_system_timer=%ld",g_system_timer);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, prio);
     if (status < 0) {
       printf("ERROR mq_send failure=%d\n", status);
@@ -218,7 +219,7 @@ int mq_test_main(int argc, char *argv[])
       printf("ERROR mq_open failed\n");
     }
     memset(msg_buffer,0,sizeof(msg_buffer));
-    sprintf(msg_buffer,"g_system_ticks=%ld",g_system_ticks);
+    sprintf(msg_buffer,"g_system_timer=%ld",g_system_timer);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, 47);
     if (status < 0) {
       printf("ERROR mq_send failure=%d\n", status);
@@ -230,7 +231,7 @@ int mq_test_main(int argc, char *argv[])
       printf("ERROR mq_open failed\n");
     }
     memset(msg_buffer,0,sizeof(msg_buffer));
-    sprintf(msg_buffer,"g_system_ticks=%ld",g_system_ticks);
+    sprintf(msg_buffer,"g_system_timer=%ld",g_system_timer);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, 47);
     if (status < 0) {
       printf("ERROR mq_send failure=%d\n", status);
@@ -238,6 +239,9 @@ int mq_test_main(int argc, char *argv[])
     mq_close(mqfd);
   } else {
     printf("Named Message Queue Interfaces example\n");
+    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
   return 0;
 }

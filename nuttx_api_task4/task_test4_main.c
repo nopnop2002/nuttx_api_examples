@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/version.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -105,7 +106,7 @@ static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[1]);
   int wait=atoi(argv[2]);
-  printf("%s start PID:%d loop:%d wait:%d system_ticks:%ld\n",argv[0],myPid,loop,wait,g_system_ticks);
+  printf("%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
 #if 0
   printf("argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
@@ -121,7 +122,7 @@ static void task_entry(int argc, char * argv[]) {
       get_primes(&count, &last);
     }
   }
-  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
+  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
   exit(0);
 }
 
@@ -175,6 +176,7 @@ int task_test4_main(int argc, char *argv[])
     printf("myTask2 exit code=%d\n",stat_loc);
   } else {
     printf("Task Synchronization Interfaces example\n");
+    printf("sched_get_priority_std=%d\n",prio_std);
     printf("sched_get_priority_max=%d\n",prio_max);
     printf("sched_get_priority_min=%d\n",prio_min);
   }

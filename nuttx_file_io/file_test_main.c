@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/version.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

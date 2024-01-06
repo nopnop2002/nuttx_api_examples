@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/version.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -111,7 +112,7 @@ static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[1]);
   int wait=atoi(argv[2]);
-  printf("%s start PID:%d loop:%d wait:%d system_ticks:%ld\n",argv[0],myPid,loop,wait,g_system_ticks);
+  printf("%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
 #if 0
   printf("argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
@@ -127,27 +128,8 @@ static void task_entry(int argc, char * argv[]) {
       get_primes(&count, &last);
     }
   }
-  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
+  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 }
-
-#if 0
-// Task Launcher
-static void task_fork(char *name, int priority, int loop, int wait) {
-  int ret;
-  UNUSED(ret);
-  char wk0[10];
-  sprintf(wk0,"%d",loop);
-  g_argv[0] = wk0;
-  char wk1[10];
-  sprintf(wk1,"%d",wait);
-  g_argv[1] = wk1;
-  g_argv[2] = NULL;
-  printf("task_create name:%s priority:%d\n",name, priority);
-  ret = task_create(name,priority,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
-}
-#endif
-
-
 
 /****************************************************************************
  * task_test3_main
@@ -179,23 +161,41 @@ int task_test3_main(int argc, char *argv[])
     g_argv[2] = NULL;
     int ret;
     UNUSED(ret);
-    ret = task_init((FAR struct tcb_s *)tcb1,"myTask1",prio_std,stack1,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
+#if CONFIG_VERSION_MAJOR >= 11
+    ret = nxtask_init((FAR struct task_tcb_s *)tcb1,"myTask1",prio_std,stack1,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv,NULL);
+    ret = nxtask_init((FAR struct task_tcb_s *)tcb2,"myTask2",prio_std,stack2,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv,NULL);
+#else
+    ret = nxtask_init((FAR struct task_tcb_s *)tcb1,"myTask1",prio_std,stack1,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
+    ret = nxtask_init((FAR struct task_tcb_s *)tcb2,"myTask2",prio_std,stack2,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
+#endif
     pid1 = tcb1->cmn.pid;
-    ret = task_init((FAR struct tcb_s *)tcb2,"myTask2",prio_std,stack2,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
     pid2 = tcb2->cmn.pid;
     printf("pid1=%d pid2=%d\n",pid1,pid2);
     sched_getparam(pid1,&param1);
     sched_getparam(pid2,&param2);
   } else if (strcmp(argv[1],"activate") == 0) {
-    task_activate((FAR struct tcb_s *)tcb1);
-    task_activate((FAR struct tcb_s *)tcb2);
+    nxtask_activate((FAR struct tcb_s *)tcb1);
+    nxtask_activate((FAR struct tcb_s *)tcb2);
   } else if (strcmp(argv[1],"rr") == 0) {
     sched_setscheduler(pid1,SCHED_RR,&param1);
     sched_setscheduler(pid2,SCHED_RR,&param2);
+  } else if (strcmp(argv[1],"fifo") == 0) {
+    sched_setscheduler(pid1,SCHED_FIFO,&param1);
+    sched_setscheduler(pid2,SCHED_FIFO,&param2);
+  } else if (strcmp(argv[1],"help") == 0) {
+    printf("Usage:\n");
+    printf("      task_test3 init : initialize task\n");
+    printf("      task_test3 rr : setscheduler SCHED_RR\n");
+    printf("      task_test3 fifo : setscheduler SCHED_FIFO\n");
+    printf("      task_test3 activate : activate task\n");
   } else {
-    printf("Task Scheduling Interfaces example\n");
+    printf("Task Control Interfaces example\n");
+    printf("sched_get_priority_std=%d\n",prio_std);
     printf("sched_get_priority_max=%d\n",prio_max);
     printf("sched_get_priority_min=%d\n",prio_min);
+    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
   return 0;
 }

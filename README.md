@@ -1,6 +1,17 @@
-# How to use   
+# Software requirements   
+Nuttx Version 11.0 or lower.   
+From Nuttx Version 12.0, the global variable of g_system_timer has been changed to g_system_ticks.   
 
-nuttx directory is $HOME/nuttxspaces.   
+# Install Nuttx   
+Install Nuttx to $HOME/nuttxspaces.   
+```
+$ mkdir $HOME/nuttxspace
+$ cd $HOME/nuttxspace
+$ git clone -b releases/11.0 https://github.com/apache/nuttx.git nuttx
+$ git clone -b releases/11.0 https://github.com/apache/nuttx-apps apps
+```
+
+# How to use   
 Copy all file to your $HOME/nuttxspaces/apps/examples directory and add all examples to Kconfig.   
 
 

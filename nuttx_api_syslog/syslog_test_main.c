@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/version.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,7 +72,7 @@ static void send_task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[2]);
   int wait=atoi(argv[3]);
-  printf("%s start PID:%d device=%s loop:%d wait:%d system_ticks:%ld\n",argv[0],myPid,argv[1],loop,wait,g_system_ticks);
+  printf("%s start PID:%d device=%s loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,argv[1],loop,wait,g_system_timer);
   int fd = open(argv[1],O_RDWR);
   if (fd < 0) {
     printf("%s open error %d\n",argv[0],fd);
@@ -87,7 +88,7 @@ static void send_task_entry(int argc, char * argv[]) {
     if(wait) sleep(wait);
   }
   close(fd);
-  printf("%s end PID:%d system_ticks:%ld\n",argv[0],myPid,g_system_ticks);
+  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 }
 
 // Task Launcher
@@ -131,6 +132,9 @@ int syslog_test_main(int argc, char *argv[])
     task_fork("sendTask", prio_std, "/dev/ttyS0", 10, 1);
   } else {
     printf("SYSLOG Interfaces example\n");
+    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
   return 0;
 }

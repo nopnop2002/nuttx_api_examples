@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/version.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -72,7 +73,7 @@ static uint16_t work2_stop = 0;
  ****************************************************************************/
 
 static void work1_loop(int argc, char *argv[]) {
-  clock_t start_ticks = g_system_ticks;
+  clock_t start_ticks = g_system_timer;
   pid_t myPid = getpid();
   syslog(LOG_DEBUG,"work1_loop started PID:%d work1_delay:%d work1_stop:%d start_ticks:%ld\n",myPid, work1_delay, work1_stop, start_ticks);
   if (work1_stop == 0) {
@@ -81,14 +82,14 @@ static void work1_loop(int argc, char *argv[]) {
     if (ret != 0) printf("work_queue ret=%d\n",ret);
   }
 #if 0
-  clock_t last_ticks = g_system_ticks;
+  clock_t last_ticks = g_system_timer;
   clock_t elapsed = last_ticks - start_ticks;
   syslog(LOG_DEBUG,"work1_loop ended last_ticks=%d elapsed\n",last_ticks,elapsed);
 #endif
 }
 
 static void work2_loop(int argc, char *argv[]) {
-  clock_t start_ticks = g_system_ticks;
+  clock_t start_ticks = g_system_timer;
   pid_t myPid = getpid();
   syslog(LOG_DEBUG,"work2_loop started PID:%d work2_delay:%d work2_stop:%d start_ticks:%ld\n",myPid, work2_delay, work2_stop, start_ticks);
   if (work2_stop == 0) {
@@ -97,7 +98,7 @@ static void work2_loop(int argc, char *argv[]) {
     if (ret != 0) printf("work_queue ret=%d\n",ret);
   }
 #if 0
-  clock_t last_ticks = g_system_ticks;
+  clock_t last_ticks = g_system_timer;
   clock_t elapsed = last_ticks - start_ticks;
   syslog(LOG_DEBUG,"work2_loop ended last_ticks=%d elapsed\n",last_ticks,elapsed);
 #endif
@@ -136,6 +137,9 @@ int wq_test_main(int argc, char *argv[])
     work2_stop = 1;
   } else {
     printf("Work Queue Interfaces example\n");
+    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
   return 0;
 }
