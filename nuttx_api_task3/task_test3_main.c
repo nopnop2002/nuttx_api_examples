@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sched.h>
+#include <syslog.h>
 
 #define STACKSIZE 2048
 #define PRIORITY SCHED_PRIORITY_DEFAULT
@@ -98,7 +99,7 @@ static void get_primes(int *count, int *last)
       local_count++;
       *last = number;
 #if 0 /* We don't really care what the numbers are */
-      printf(" Prime %d: %d\n", local_count, number);
+      syslog(LOG_INFO, " Prime %d: %d\n", local_count, number);
 #endif
     }
   }
@@ -112,11 +113,11 @@ static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[1]);
   int wait=atoi(argv[2]);
-  printf("%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
+  syslog(LOG_INFO, "%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
 #if 0
-  printf("argc=%d\n",argc);
+  syslog(LOG_INFO, "argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
-    printf("argv=%s\n",argv[i]);
+    syslog(LOG_INFO, "argv=%s\n",argv[i]);
   }
 #endif
   int count;
@@ -128,7 +129,7 @@ static void task_entry(int argc, char * argv[]) {
       get_primes(&count, &last);
     }
   }
-  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
+  syslog(LOG_INFO, "%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 }
 
 /****************************************************************************
@@ -170,7 +171,7 @@ int task_test3_main(int argc, char *argv[])
 #endif
     pid1 = tcb1->cmn.pid;
     pid2 = tcb2->cmn.pid;
-    printf("pid1=%d pid2=%d\n",pid1,pid2);
+    syslog(LOG_INFO, "pid1=%d pid2=%d\n",pid1,pid2);
     sched_getparam(pid1,&param1);
     sched_getparam(pid2,&param2);
   } else if (strcmp(argv[1],"activate") == 0) {
@@ -183,19 +184,19 @@ int task_test3_main(int argc, char *argv[])
     sched_setscheduler(pid1,SCHED_FIFO,&param1);
     sched_setscheduler(pid2,SCHED_FIFO,&param2);
   } else if (strcmp(argv[1],"help") == 0) {
-    printf("Usage:\n");
-    printf("      task_test3 init : initialize task\n");
-    printf("      task_test3 rr : setscheduler SCHED_RR\n");
-    printf("      task_test3 fifo : setscheduler SCHED_FIFO\n");
-    printf("      task_test3 activate : activate task\n");
+    syslog(LOG_INFO, "Usage:\n");
+    syslog(LOG_INFO, "      task_test3 init : initialize task\n");
+    syslog(LOG_INFO, "      task_test3 rr : setscheduler SCHED_RR\n");
+    syslog(LOG_INFO, "      task_test3 fifo : setscheduler SCHED_FIFO\n");
+    syslog(LOG_INFO, "      task_test3 activate : activate task\n");
   } else {
-    printf("Task Control Interfaces example\n");
-    printf("sched_get_priority_std=%d\n",prio_std);
-    printf("sched_get_priority_max=%d\n",prio_max);
-    printf("sched_get_priority_min=%d\n",prio_min);
-    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
-    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
-    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
+    syslog(LOG_INFO, "Task Control Interfaces example\n");
+    syslog(LOG_INFO, "sched_get_priority_std=%d\n",prio_std);
+    syslog(LOG_INFO, "sched_get_priority_max=%d\n",prio_max);
+    syslog(LOG_INFO, "sched_get_priority_min=%d\n",prio_min);
+    syslog(LOG_INFO, "CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
   return 0;
 }

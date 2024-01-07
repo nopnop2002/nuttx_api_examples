@@ -47,8 +47,7 @@
 #include <time.h>
 #include <sched.h>
 #include <errno.h>
-
-
+#include <syslog.h>
 
 #define SEM1_NAME "foo"
 #define SEM2_NAME "bar"
@@ -103,7 +102,7 @@ static void get_primes(int *count, int *last)
       local_count++;
       *last = number;
 #if 0 /* We don't really care what the numbers are */
-      printf(" Prime %d: %d\n", local_count, number);
+      syslog(LOG_INFO, " Prime %d: %d\n", local_count, number);
 #endif
     }
   }
@@ -116,36 +115,36 @@ static void get_primes(int *count, int *last)
 // Task Body
 static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
-  printf("%s start PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
+  syslog(LOG_INFO, "%s start PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 #if 0
-  printf("argc=%d\n",argc);
+  syslog(LOG_INFO, "argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
-    printf("argv=%s\n",argv[i]);
+    syslog(LOG_INFO, "argv=%s\n",argv[i]);
   }
 #endif
-  printf("%s Open semaphore[%s]\n",argv[0],argv[1]);
+  syslog(LOG_INFO, "%s Open semaphore[%s]\n",argv[0],argv[1]);
 
   FAR sem_t *sem;
   int status;
   sem = sem_open(argv[1], 0);
   if (sem == SEM_FAILED) {
     int errcode = errno;
-    printf("%s: ERROR: sem_open(1) failed: %d\n", argv[0],errcode);
+    syslog(LOG_ERR, "%s: ERROR: sem_open(1) failed: %d\n", argv[0],errcode);
     return;
   }
 
   while(1) {
-    printf("%s Try Lock semaphore [%s]\n",argv[0],argv[1]);
+    syslog(LOG_INFO, "%s Try Lock semaphore [%s]\n",argv[0],argv[1]);
     status = sem_wait(sem);
     if (status < 0) {
       int errcode = errno;
-      printf("%s: ERROR: sem_wait(1) failed: %d\n",  argv[0],errcode);
+      syslog(LOG_ERR, "%s: ERROR: sem_wait(1) failed: %d\n",  argv[0],errcode);
       return;
     }
-    printf("%s Lock success semaphore [%s]\n",argv[0],argv[1]);
+    syslog(LOG_INFO, "%s Lock success semaphore [%s]\n",argv[0],argv[1]);
   }
   sem_close(sem);
-  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
+  syslog(LOG_INFO, "%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 }
 
 // Task Launcher
@@ -154,7 +153,7 @@ static void task_fork(char *name, int priority, char *sem) {
   UNUSED(ret);
   g_argv[0] = sem;
   g_argv[1] = NULL;
-  printf("task_create name:%s priorty:%d\n",name, priority);
+  syslog(LOG_INFO, "task_create name:%s priorty:%d\n",name, priority);
   ret = task_create(name,priority,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
 }
 
@@ -176,13 +175,13 @@ int sem_test_main(int argc, char *argv[])
     sem1 = sem_open(SEM1_NAME, O_CREAT|O_EXCL, 0644, 0);
     if (sem1 == SEM_FAILED) {
       int errcode = errno;
-      printf("ERROR: sem_open(1) failed: %d\n", errcode);
+      syslog(LOG_ERR, "ERROR: sem_open(1) failed: %d\n", errcode);
       return 0;
     }
     sem2 = sem_open(SEM2_NAME, O_CREAT|O_EXCL, 0644, 0);
     if (sem2 == SEM_FAILED) {
       int errcode = errno;
-      printf("ERROR: sem_open(1) failed: %d\n", errcode);
+      syslog(LOG_ERR, "ERROR: sem_open(1) failed: %d\n", errcode);
       return 0;
     }
     task_fork("myTask1", prio_std, SEM1_NAME);
@@ -197,7 +196,7 @@ int sem_test_main(int argc, char *argv[])
     sem3 = sem_open(SEM3_NAME, O_CREAT|O_EXCL, 0644, 2);
     if (sem3 == SEM_FAILED) {
       int errcode = errno;
-      printf("ERROR: sem_open(1) failed: %d\n", errcode);
+      syslog(LOG_ERR, "ERROR: sem_open(1) failed: %d\n", errcode);
       return 0;
     }
     int sval;
@@ -205,13 +204,13 @@ int sem_test_main(int argc, char *argv[])
     int status;
     for(int i=0;i<3;i++) {
       sem_getvalue(sem3, &sval);
-      printf("BEFORE sem value=%d\n",sval);
+      syslog(LOG_INFO, "BEFORE sem value=%d\n",sval);
       clock_gettime(CLOCK_REALTIME, &time);
       time.tv_sec += 2;
       status = sem_timedwait(sem3,&time);
-      printf("sem_timedwait status=%d\n",status);
+      syslog(LOG_INFO, "sem_timedwait status=%d\n",status);
       sem_getvalue(sem3, &sval);
-      printf("AFTER sem value=%d\n",sval);
+      syslog(LOG_INFO, "AFTER sem value=%d\n",sval);
     }
     sem_close(sem3);
     sem_unlink(SEM3_NAME);
@@ -219,24 +218,24 @@ int sem_test_main(int argc, char *argv[])
     sem3 = sem_open(SEM3_NAME, O_CREAT|O_EXCL, 0644, 2);
     if (sem3 == SEM_FAILED) {
       int errcode = errno;
-      printf("ERROR: sem_open(1) failed: %d\n", errcode);
+      syslog(LOG_ERR, "ERROR: sem_open(1) failed: %d\n", errcode);
       return 0;
     }
     int sval;
     while(1) {
       sem_getvalue(sem3, &sval);
-      printf("BEFORE sem value=%d\n",sval);
+      syslog(LOG_INFO, "BEFORE sem value=%d\n",sval);
       sem_wait(sem3);
       sem_getvalue(sem3, &sval);
-      printf("AFTER sem value=%d\n",sval);
+      syslog(LOG_INFO, "AFTER sem value=%d\n",sval);
     }
     sem_close(sem3);
     sem_unlink(SEM3_NAME);
   } else {
-    printf("Counting Semaphore Interfaces example\n");
-    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
-    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
-    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
+    syslog(LOG_INFO, "Counting Semaphore Interfaces example\n");
+    syslog(LOG_INFO, "CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
   return 0;
 }

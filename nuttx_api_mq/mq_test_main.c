@@ -46,8 +46,7 @@
 #include <mqueue.h>
 #include <sched.h>
 #include <errno.h>
-
-
+#include <syslog.h>
 
 #define MQ1_NAME "foo"
 #define MQ2_NAME "bar"
@@ -98,7 +97,7 @@ static void get_primes(int *count, int *last)
       local_count++;
       *last = number;
 #if 0 /* We don't really care what the numbers are */
-      printf(" Prime %d: %d\n", local_count, number);
+      syslog(LOG_INFO, " Prime %d: %d\n", local_count, number);
 #endif
     }
   }
@@ -111,15 +110,15 @@ static void get_primes(int *count, int *last)
 // Task Body
 static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
-  printf("%s start PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
+  syslog(LOG_INFO, "%s start PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 #if 0
-  printf("argc=%d\n",argc);
+  syslog(LOG_INFO, "argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
-    printf("argv=%s\n",argv[i]);
+    syslog(LOG_INFO, "argv=%s\n",argv[i]);
   }
 #endif
 
-  printf("%s Open Message Queue[%s]\n",argv[0],argv[1]);
+  syslog(LOG_INFO, "%s Open Message Queue[%s]\n",argv[0],argv[1]);
   struct mq_attr my_attr;
   mqd_t my_mqfd;
   my_attr.mq_maxmsg  = 20;
@@ -127,7 +126,7 @@ static void task_entry(int argc, char * argv[]) {
   my_attr.mq_flags   = 0;
   my_mqfd = mq_open(argv[1], O_RDONLY|O_CREAT, 0666, &my_attr);
   if (my_mqfd == (mqd_t)-1) {
-    printf("%s: ERROR: mq_open failed\n", argv[0]);
+    syslog(LOG_ERR, "%s: ERROR: mq_open failed\n", argv[0]);
     return;
   }
 
@@ -135,14 +134,14 @@ static void task_entry(int argc, char * argv[]) {
   unsigned int prio;
   int nbytes;
   while(1) {
-    printf("%s Wait on Message Queue[%s]\n",argv[0],argv[1]);
+    syslog(LOG_INFO, "%s Wait on Message Queue[%s]\n",argv[0],argv[1]);
     memset(msg_buffer,0,sizeof(msg_buffer));
     nbytes = mq_receive(my_mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, &prio);
-    printf("%s Receive from Message Queue[%s] nbytes=%d prio=%d\n",argv[0],argv[1],nbytes,prio);
-    printf("%s msg_buufer=%s\n",argv[0],msg_buffer);
+    syslog(LOG_INFO, "%s Receive from Message Queue[%s] nbytes=%d prio=%d\n",argv[0],argv[1],nbytes,prio);
+    syslog(LOG_INFO, "%s msg_buufer=%s\n",argv[0],msg_buffer);
   }
   mq_close(my_mqfd);
-  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
+  syslog(LOG_INFO, "%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 }
 
 // Task Launcher
@@ -152,7 +151,7 @@ static void task_fork(char *name, int priority, char *mq) {
 //  char wk0[10];
   g_argv[0] = mq;
   g_argv[1] = NULL;
-  printf("task_create name:%s priorty:%d\n",name, priority);
+  syslog(LOG_INFO, "task_create name:%s priorty:%d\n",name, priority);
   ret = task_create(name,priority,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
 }
 
@@ -175,39 +174,33 @@ int mq_test_main(int argc, char *argv[])
   unsigned int prio;
   int status;
 
+  attr.mq_maxmsg  = 20;
+  attr.mq_msgsize = CONFIG_MQ_MAXMSGSIZE;
+  attr.mq_flags   = 0;
+  mqfd = mq_open("mqueu", O_RDONLY|O_CREAT|O_NONBLOCK, 0666, &attr);
+  if (mqfd == (mqd_t)-1) {
+    syslog(LOG_ERR, "ERROR mq_open failed\n");
+  }
+
   if (strcmp(argv[1],"send") == 0) {
     prio = 42;
     if (argc == 3) prio=atoi(argv[2]);
-//    printf("prio=%d\n",prio);
-    attr.mq_maxmsg  = 20;
-    attr.mq_msgsize = CONFIG_MQ_MAXMSGSIZE;
-    attr.mq_flags   = 0;
-    mqfd = mq_open("mqueu", O_WRONLY|O_CREAT, 0666, &attr);
-    if (mqfd == (mqd_t)-1) {
-      printf("ERROR mq_open failed\n");
-    } 
+    //syslog(LOG_INFO, "prio=%d\n",prio);
     memset(msg_buffer,0,sizeof(msg_buffer));
     sprintf(msg_buffer,"g_system_timer=%ld",g_system_timer);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, prio);
     if (status < 0) {
-      printf("ERROR mq_send failure=%d\n", status);
+      syslog(LOG_ERR, "ERROR mq_send failure=%d\n", status);
     }
     mq_close(mqfd);
   } else if (strcmp(argv[1],"recv") == 0) {
-    attr.mq_maxmsg  = 20;
-    attr.mq_msgsize = CONFIG_MQ_MAXMSGSIZE;
-    attr.mq_flags   = 0;
-    mqfd = mq_open("mqueu", O_RDONLY|O_CREAT|O_NONBLOCK, 0666, &attr);
-    if (mqfd == (mqd_t)-1) {
-      printf("ERROR mq_open failed\n");
-    }
     int nbytes;
     while (1) {
       memset(msg_buffer,0,sizeof(msg_buffer));
       nbytes = mq_receive(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, &prio);
       if (nbytes < 0) break;
-      printf("nbytes=%d prio=%d\n",nbytes,prio);
-      printf("msg_buufer=%s\n",msg_buffer);
+      syslog(LOG_INFO, "nbytes=%d prio=%d\n",nbytes,prio);
+      syslog(LOG_INFO, "msg_buufer=%s\n",msg_buffer);
     }
     mq_close(mqfd);
   } else if (strcmp(argv[1],"start") == 0) {
@@ -216,32 +209,33 @@ int mq_test_main(int argc, char *argv[])
   } else if (strcmp(argv[1],"foo") == 0) {
     mqfd = mq_open(MQ1_NAME, O_WRONLY);
     if (mqfd == (mqd_t)-1) {
-      printf("ERROR mq_open failed\n");
+      syslog(LOG_ERR, "ERROR mq_open failed\n");
     }
     memset(msg_buffer,0,sizeof(msg_buffer));
     sprintf(msg_buffer,"g_system_timer=%ld",g_system_timer);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, 47);
     if (status < 0) {
-      printf("ERROR mq_send failure=%d\n", status);
+      syslog(LOG_ERR, "ERROR mq_send failure=%d\n", status);
     }
     mq_close(mqfd);
   } else if (strcmp(argv[1],"bar") == 0) {
     mqfd = mq_open(MQ2_NAME, O_WRONLY);
     if (mqfd == (mqd_t)-1) {
-      printf("ERROR mq_open failed\n");
+      syslog(LOG_ERR, "ERROR mq_open failed\n");
     }
     memset(msg_buffer,0,sizeof(msg_buffer));
     sprintf(msg_buffer,"g_system_timer=%ld",g_system_timer);
     status = mq_send(mqfd, msg_buffer, CONFIG_MQ_MAXMSGSIZE, 47);
     if (status < 0) {
-      printf("ERROR mq_send failure=%d\n", status);
+      syslog(LOG_ERR, "ERROR mq_send failure=%d\n", status);
     }
     mq_close(mqfd);
   } else {
-    printf("Named Message Queue Interfaces example\n");
-    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
-    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
-    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
+    syslog(LOG_INFO, "Named Message Queue Interfaces example\n");
+    syslog(LOG_INFO, "CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
+    syslog(LOG_INFO, "CONFIG_MQ_MAXMSGSIZE=%d\n",CONFIG_MQ_MAXMSGSIZE);
   }
   return 0;
 }

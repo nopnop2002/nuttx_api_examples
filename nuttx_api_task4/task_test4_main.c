@@ -42,7 +42,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sched.h>
 #include <sys/wait.h>
+#include <syslog.h>
 
 #define STACKSIZE 2048
 #define PRIORITY SCHED_PRIORITY_DEFAULT
@@ -92,7 +94,7 @@ static void get_primes(int *count, int *last)
       local_count++;
       *last = number;
 #if 0 /* We don't really care what the numbers are */
-      printf(" Prime %d: %d\n", local_count, number);
+      syslog(LOG_INFO, " Prime %d: %d\n", local_count, number);
 #endif
     }
   }
@@ -106,11 +108,11 @@ static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[1]);
   int wait=atoi(argv[2]);
-  printf("%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
+  syslog(LOG_INFO, "%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
 #if 0
-  printf("argc=%d\n",argc);
+  syslog(LOG_INFO, "argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
-    printf("argv=%s\n",argv[i]);
+    syslog(LOG_INFO, "argv=%s\n",argv[i]);
   }
 #endif
   int count;
@@ -122,7 +124,7 @@ static void task_entry(int argc, char * argv[]) {
       get_primes(&count, &last);
     }
   }
-  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
+  syslog(LOG_INFO, "%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
   exit(0);
 }
 
@@ -137,7 +139,7 @@ static pid_t task_fork(char *name, int priority, int loop, int wait) {
   sprintf(wk1,"%d",wait);
   g_argv[1] = wk1;
   g_argv[2] = NULL;
-  printf("task_create name:%s priority:%d\n",name, priority);
+  syslog(LOG_INFO, "task_create name:%s priority:%d\n",name, priority);
   ret = task_create(name,priority,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
   return ret;
 }
@@ -162,23 +164,27 @@ int task_test4_main(int argc, char *argv[])
 
   if (strcmp(argv[1],"test1") == 0) {
     pid1 = task_fork("myTask1", prio_std, 50000000, 0);
-    printf("pid1=%d\n",pid1);
+    //syslog(LOG_INFO, "pid1=%d\n",pid1);
     pid2 = task_fork("myTask2", prio_std, 50000000, 0);
-    printf("pid2=%d\n",pid2);
+    //syslog(LOG_INFO, "pid2=%d\n",pid2);
   } else if (strcmp(argv[1],"test2") == 0) {
     pid1 = task_fork("myTask1", prio_std, 50000000, 0);
-    printf("pid1=%d\n",pid1);
+    //syslog(LOG_INFO, "pid1=%d\n",pid1);
     waitpid(pid1, &stat_loc, options);
-    printf("myTask1 exit code=%d\n",stat_loc);
+    syslog(LOG_INFO, "myTask1 exit code=%d\n",stat_loc);
     pid2 = task_fork("myTask2", prio_std, 50000000, 0);
-    printf("pid2=%d\n",pid2);
+    //syslog(LOG_INFO, "pid2=%d\n",pid2);
     waitpid(pid2, &stat_loc, options);
-    printf("myTask2 exit code=%d\n",stat_loc);
+    syslog(LOG_INFO, "myTask2 exit code=%d\n",stat_loc);
   } else {
-    printf("Task Synchronization Interfaces example\n");
-    printf("sched_get_priority_std=%d\n",prio_std);
-    printf("sched_get_priority_max=%d\n",prio_max);
-    printf("sched_get_priority_min=%d\n",prio_min);
+    syslog(LOG_INFO, "Task Synchronization Interfaces example\n");
+    syslog(LOG_INFO, "sched_get_priority_std=%d\n",prio_std);
+    syslog(LOG_INFO, "sched_get_priority_max=%d\n",prio_max);
+    syslog(LOG_INFO, "sched_get_priority_min=%d\n",prio_min);
+    syslog(LOG_INFO, "CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
+  syslog(LOG_INFO, "task_test4 Finish\n");
   return 0;
 }

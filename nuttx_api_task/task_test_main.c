@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sched.h>
+#include <syslog.h>
 
 #define STACKSIZE 2048
 #define PRIORITY SCHED_PRIORITY_DEFAULT
@@ -89,7 +90,7 @@ static void get_primes(int *count, int *last)
       local_count++;
       *last = number;
 #if 0 /* We don't really care what the numbers are */
-      printf(" Prime %d: %d\n", local_count, number);
+      syslog(LOG_INFO, " Prime %d: %d\n", local_count, number);
 #endif
     }
   }
@@ -103,23 +104,23 @@ static void task_entry(int argc, char * argv[]) {
   pid_t myPid = getpid();
   int loop=atoi(argv[1]);
   int wait=atoi(argv[2]);
-  printf("%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
+  syslog(LOG_INFO, "%s start PID:%d loop:%d wait:%d system_timer:%ld\n",argv[0],myPid,loop,wait,g_system_timer);
 #if 0
-  printf("argc=%d\n",argc);
+  syslog(LOG_INFO, "argc=%d\n",argc);
   for(int i=0;i<argc;i++) {
-    printf("argv=%s\n",argv[i]);
+    syslog(LOG_INFO, "argv=%s\n",argv[i]);
   }
 #endif
   int count;
   int last;
   for(int i=0;i<loop;i++) {
     if(wait) {
-      sleep(wait);
+      usleep(wait);
     } else {
       get_primes(&count, &last);
     }
   }
-  printf("%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
+  syslog(LOG_INFO, "%s end PID:%d system_timer:%ld\n",argv[0],myPid,g_system_timer);
 }
 
 // Task Launcher
@@ -133,7 +134,7 @@ static void task_fork(char *name, int priority, int loop, int wait) {
   sprintf(wk1,"%d",wait);
   g_argv[1] = wk1;
   g_argv[2] = NULL;
-  printf("task_create name:%s priority:%d\n",name, priority);
+  syslog(LOG_INFO, "task_create name:%s priority:%d\n",name, priority);
   ret = task_create(name,priority,STACKSIZE,(main_t)task_entry,(FAR char * const *)g_argv);
 }
 
@@ -154,33 +155,34 @@ int task_test_main(int argc, char *argv[])
   int prio_min = sched_get_priority_min(SCHED_FIFO);
 
   if (strcmp(argv[1],"test1") == 0) {
-    task_fork("myTask1", prio_std, 10, 1);
-    task_fork("myTask2", prio_std, 10, 1);
+    task_fork("myTask1", prio_std, 10000000, 0);
+    task_fork("myTask2", prio_std, 10000000, 0);
   } else if (strcmp(argv[1],"test2") == 0) {
-    task_fork("myTask1", prio_std, 50000000, 0);
-    task_fork("myTask2", prio_std, 50000000, 0);
+    task_fork("myTask1", prio_std, 10000000, 0);
+    task_fork("myTask2", prio_min, 10000000, 0);
+    task_fork("myTask3", prio_max, 10000000, 0);
   } else if (strcmp(argv[1],"test3") == 0) {
-    task_fork("myTask1", prio_std, 50000000, 0);
-    task_fork("myTask2", prio_min, 50000000, 0);
-    task_fork("myTask3", prio_max, 50000000, 0);
+    task_fork("myTask1", prio_std, 10000000, 0);
+    sleep(1); // wait 1Sec
+    task_fork("myTask2", prio_min, 10000000, 0);
+    task_fork("myTask3", prio_max, 10000000, 0);
   } else if (strcmp(argv[1],"test4") == 0) {
-    task_fork("myTask1", prio_std, 50000000, 0);
-    usleep(1); // wait 1uSec
-    task_fork("myTask2", prio_min, 50000000, 0);
-    task_fork("myTask3", prio_max, 50000000, 0);
+    task_fork("myTask1", prio_min, 10000000, 0);
+    sleep(1); // wait 1Sec
+    task_fork("myTask2", prio_max, 10000000, 0);
+    task_fork("myTask3", prio_max, 10000000, 0);
   } else if (strcmp(argv[1],"test5") == 0) {
-    task_fork("myTask1", prio_min, 50000000, 0);
-    usleep(1); // wait 1uSec
-    task_fork("myTask2", prio_max, 50000000, 0);
-    task_fork("myTask3", prio_max, 50000000, 0);
+    task_fork("myTask1", prio_std, 100, 1);
+    task_fork("myTask2", prio_std, 100, 1);
   } else {
-    printf("Task Control Interfaces example\n");
-    printf("sched_get_priority_std=%d\n",prio_std);
-    printf("sched_get_priority_max=%d\n",prio_max);
-    printf("sched_get_priority_min=%d\n",prio_min);
-    printf("CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
-    printf("CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
-    printf("CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
+    syslog(LOG_INFO, "Task Control Interfaces example\n");
+    syslog(LOG_INFO, "sched_get_priority_std=%d\n",prio_std);
+    syslog(LOG_INFO, "sched_get_priority_max=%d\n",prio_max);
+    syslog(LOG_INFO, "sched_get_priority_min=%d\n",prio_min);
+    syslog(LOG_INFO, "CONFIG_VERSION_MAJOR=%d\n",CONFIG_VERSION_MAJOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_MINOR=%d\n",CONFIG_VERSION_MINOR);
+    syslog(LOG_INFO, "CONFIG_VERSION_PATCH=%d\n",CONFIG_VERSION_PATCH);
   }
+  syslog(LOG_INFO, "task_test Finish\n");
   return 0;
 }
