@@ -1,6 +1,7 @@
 # Software requirements   
 Nuttx Version 11.0 or lower.   
-From Nuttx Version 12.0, the global variable of g_system_timer has been changed to g_system_ticks.   
+From Nuttx Version 12.0, the global variable of ```g_system_timer``` has been changed to ```g_system_ticks```.   
+If you use Nuttx Version 12.0 or higher, you need to replace this variable.   
 
 # Install Nuttx   
 Install Nuttx to $HOME/nuttxspaces.   
