@@ -49,12 +49,15 @@
 #include <errno.h>
 #include <syslog.h>
 
+#if CONFIG_VERSION_MAJOR >= 12
+#define g_system_timer g_system_ticks
+#endif
+
 #define SEM1_NAME "foo"
 #define SEM2_NAME "bar"
 #define SEM3_NAME "baz"
 #define STACKSIZE 2048
 #define PRIORITY SCHED_PRIORITY_DEFAULT
-
 
 /****************************************************************************
  * Public Functions
@@ -65,52 +68,11 @@
  * Private Data
  ****************************************************************************/
 static const char *g_argv[5];
-static FAR sem_t *sem1;
-static FAR sem_t *sem2;
-static FAR sem_t *sem3;
 
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-// This function searches for prime numbers in the most primitive way possible.
-// This is used to gain time.
-
-#if 0
-static void get_primes(int *count, int *last)
-{
-  int number;
-  int local_count = 0;
-
-  *last = 0;    /* To make the compiler happy */
-
-  for (number = 1; number < 100000; number++)
-  {
-    int div;
-    bool is_prime = true;
-
-    for (div = 2; div <= number / 2; div++)
-      if (number % div == 0)
-      {
-        is_prime = false;
-        break;
-      }
-
-    if (is_prime)
-    {
-      local_count++;
-      *last = number;
-#if 0 /* We don't really care what the numbers are */
-      syslog(LOG_INFO, " Prime %d: %d\n", local_count, number);
-#endif
-    }
-  }
-
-  *count = local_count;
-}
-#endif
-
 
 // Task Body
 static void task_entry(int argc, char * argv[]) {
@@ -170,6 +132,9 @@ int sem_test_main(int argc, char *argv[])
 #endif
 {
   int prio_std = SCHED_PRIORITY_DEFAULT;
+  FAR sem_t *sem1 = NULL;
+  FAR sem_t *sem2 = NULL;
+  FAR sem_t *sem3 = NULL;
 
   if (strcmp(argv[1],"start") == 0) {
     sem1 = sem_open(SEM1_NAME, O_CREAT|O_EXCL, 0644, 0);

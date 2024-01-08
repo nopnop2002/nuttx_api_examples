@@ -48,11 +48,14 @@
 #include <errno.h>
 #include <syslog.h>
 
+#if CONFIG_VERSION_MAJOR >= 12
+#define g_system_timer g_system_ticks
+#endif
+
 #define MQ1_NAME "foo"
 #define MQ2_NAME "bar"
 #define STACKSIZE 2048
 #define PRIORITY SCHED_PRIORITY_DEFAULT
-
 
 /****************************************************************************
  * Public Functions

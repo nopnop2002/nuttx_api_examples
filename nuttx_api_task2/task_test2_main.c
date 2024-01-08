@@ -45,9 +45,12 @@
 #include <sched.h>
 #include <syslog.h>
 
+#if CONFIG_VERSION_MAJOR >= 12
+#define g_system_timer g_system_ticks
+#endif
+
 #define STACKSIZE 2048
 #define PRIORITY SCHED_PRIORITY_DEFAULT
-
 
 /****************************************************************************
  * Public Functions
